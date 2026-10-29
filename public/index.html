@@ -705,3 +705,8 @@ $("logoutBtn").addEventListener("click",async()=>{try{await api("/api/auth/logou
 .card .brand-watermark{right:8px}
 .profile-car .brand-watermark{width:42%;height:70px;right:5px}
 </style>
+
+<style id="autodex-disable-old-motifs">
+/* Désactive uniquement les anciens petits motifs répétés; conserve les logos de constructeurs .brand-watermark. */
+.card .card-body:before,.profile-car .pc-body:before{content:none!important;background:none!important;-webkit-mask-image:none!important;mask-image:none!important}
+</style>
