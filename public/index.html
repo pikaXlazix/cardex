@@ -425,7 +425,17 @@ const BRAND_REPO_SLUGS={
   "suzuki":"suzuki","tesla":"tesla","toyota":"toyota","volvo":"volvo","xpeng":"xpeng","alfa-romeo":"alfa-romeo",
   "aston-martin":"aston-martin","land-rover":"land-rover","range-rover":"land-rover","volkswagen":"volkswagen",
   "cadillac":"cadillac","acura":"acura","mitsubishi":"mitsubishi","morgan":"morgan","caterham":"caterham","koenigsegg":"koenigsegg",
-  "pagani":"pagani","rimac":"rimac","lucid":"lucid","lucid-motors":"lucid","nio":"nio","xpeng":"xpeng","vinfast":"vinfast"
+  "pagani":"pagani","rimac":"rimac","lucid":"lucid","lucid-motors":"lucid","nio":"nio","xpeng":"xpeng","vinfast":"vinfast",
+  "apollo":"apollo","arash":"arash","aspark":"aspark","ats":"ats","ats-automobili":"ats","bac":"bac","bizzarrini":"bizzarrini",
+  "brabham":"brabham","czinger":"czinger","de-tomaso":"de-tomaso","delage":"delage","donkervoort":"donkervoort",
+  "gordon-murray-automotive":"gordon-murray-automotive","gma":"gordon-murray-automotive","hennessey":"hennessey","hispano-suiza":"hispano-suiza",
+  "isdera":"isdera","ktm":"ktm","ktm-x-bow":"ktm","lister":"lister","lotec":"lotec","mazzanti":"mazzanti","noble":"noble",
+  "pininfarina":"pininfarina","praga":"praga","ruf":"ruf","saleen":"saleen","scg":"scg","ssc":"ssc","ssc-north-america":"ssc",
+  "spyker":"spyker","tushek":"tushek","ultima":"ultima","vencer":"vencer","vector":"vector","venturi":"venturi",
+  "w-motors":"w-motors","zenvo":"zenvo","naran":"naran","deus":"deus","piech":"piech","piech-automotive":"piech",
+  "automobili-pininfarina":"pininfarina","9ff":"9ff","ruf-automobile":"ruf","saleen-automotive":"saleen","rossion":"rossion",
+  "mclaren-automotive":"mclaren","mercedes-mclaren":"mclaren","ferrari":"ferrari","lamborghini":"lamborghini","bugatti":"bugatti",
+  "koenigsegg":"koenigsegg","pagani-automobili":"pagani","rimac-automobili":"rimac","zenvo-automotive":"zenvo"
 };
 function normalizedBrandKey(make){return String(make||"").trim().normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/&/g,"and").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");}
 const BRAND_ICON_ONLY_SLUGS={
@@ -446,12 +456,12 @@ const BRAND_ICON_ALIASES={
 };
 // Sources dédiées pour quelques marques dont les fichiers génériques peuvent afficher un fond carré.
 const BRAND_SPECIAL_LOGOS={
-  // PNG transparents de secours pour éviter le carré gris sur l’emblème Abarth.
-  "abarth":["https://cdn.jsdelivr.net/gh/filippofilip95/car-logos-dataset@master/logos/optimized/abarth.png","https://cdn.jsdelivr.net/gh/vehiclespecs/brand-logos@v1.0.0/abarth-logo.svg"],
-  // Marques historiques / sportives absentes de certaines bibliothèques génériques.
-  "matra":["https://commons.wikimedia.org/wiki/Special:Redirect/file/Matra_sports_logo.svg","https://cdn.jsdelivr.net/gh/vehiclespecs/brand-logos@v1.0.0/matra-logo.svg"],
-  "ats":["https://commons.wikimedia.org/wiki/Special:Redirect/file/Ats-logo.svg","https://cdn.jsdelivr.net/gh/vehiclespecs/brand-logos@v1.0.0/ats-logo.svg"],
-  "ats-automobili":["https://commons.wikimedia.org/wiki/Special:Redirect/file/Ats-logo.svg","https://cdn.jsdelivr.net/gh/vehiclespecs/brand-logos@v1.0.0/ats-logo.svg"]
+  // Priorité à des fichiers SVG/PNG transparents pour éviter les carrés de fond.
+  "abarth":["https://cdn.jsdelivr.net/npm/car-brand-logos@1.0.0/abarth-logo.svg","https://cdn.jsdelivr.net/gh/vehiclespecs/brand-logos@v1.0.0/abarth-logo.svg"],
+  "ats":["https://commons.wikimedia.org/wiki/Special:Redirect/file/Ats-logo.svg","https://cdn.jsdelivr.net/npm/car-brand-logos@1.0.0/ats-logo.svg"],
+  "ats-automobili":["https://commons.wikimedia.org/wiki/Special:Redirect/file/Ats-logo.svg","https://cdn.jsdelivr.net/npm/car-brand-logos@1.0.0/ats-logo.svg"],
+  "matra":["https://commons.wikimedia.org/wiki/Special:Redirect/file/Matra_sports_logo.svg","https://cdn.jsdelivr.net/npm/car-brand-logos@1.0.0/matra-logo.svg"],
+  "venturi":["https://cdn.jsdelivr.net/npm/car-brand-logos@1.0.0/venturi-logo.png","https://cdn.jsdelivr.net/gh/vehiclespecs/brand-logos@v1.0.0/venturi-logo.png"]
 };
 function brandLogoSources(make){
   const key=normalizedBrandKey(make);
@@ -468,6 +478,12 @@ function brandLogoSources(make){
   // Extra manufacturers use emblem SVGs only; never generate a logo from text.
   if(iconSlug) urls.push(`https://cdn.jsdelivr.net/gh/diegojasso/car-logos-SVG@main/logos/${iconSlug}.svg`);
   if(repo) urls.push(`https://cdn.jsdelivr.net/gh/vehiclespecs/brand-logos@v1.0.0/${repo}-logo.svg`);
+  // Bibliothèque plus large : couvre de nombreux constructeurs de supercars/hypercars et marques historiques.
+  const extraSlug=BRAND_REPO_SLUGS[canonical] || BRAND_REPO_SLUGS[key] || canonical;
+  if(extraSlug) {
+    urls.push(`https://cdn.jsdelivr.net/npm/car-brand-logos@1.0.0/${extraSlug}-logo.svg`);
+    urls.push(`https://cdn.jsdelivr.net/npm/car-brand-logos@1.0.0/${extraSlug}-logo.png`);
+  }
   return [...new Set(urls)];
 }
 function brandLogoUrl(make){return brandLogoSources(make)[0]||"";}
@@ -770,12 +786,12 @@ $("logoutBtn").addEventListener("click",async()=>{try{await api("/api/auth/logou
 <style id="autodex-brand-watermarks">
 /* Logos de constructeurs : détails préservés, modèles descendus et commandes dégagées. */
 .card .card-body,.profile-car .pc-body{position:relative;isolation:isolate;overflow:hidden}
-.card .brand-watermark{position:absolute;z-index:0;right:10px;top:8px;width:clamp(88px,36%,124px);height:74px;object-fit:contain;object-position:center;transform:none;opacity:.24;filter:grayscale(1) brightness(0) invert(1);pointer-events:none;user-select:none;background:transparent!important;mix-blend-mode:screen}
+.card .brand-watermark{position:absolute;z-index:0;right:10px;top:8px;width:clamp(88px,36%,124px);height:74px;object-fit:contain;object-position:center;transform:none;opacity:.24;filter:grayscale(1) contrast(1.12);pointer-events:none;user-select:none;background:transparent!important;mix-blend-mode:screen}
 .card .model{padding-right:108px;padding-top:10px;position:relative;z-index:1;min-height:34px}
 .profile-car .pc-body>strong{padding-right:86px;padding-top:8px;position:relative;z-index:1;display:block}
 .card .card-body> :not(.brand-watermark),.profile-car .pc-body> :not(.brand-watermark){position:relative;z-index:1}
 .card .card-actions{position:relative;z-index:2;margin-top:13px}
-.profile-car .brand-watermark{width:78px;height:52px;right:7px;top:5px;opacity:.22;filter:grayscale(1) brightness(0) invert(1)}
+.profile-car .brand-watermark{width:78px;height:52px;right:7px;top:5px;opacity:.22;filter:grayscale(1) contrast(1.12)}
 .profile-car .pc-body{min-height:72px}
 </style>
 
