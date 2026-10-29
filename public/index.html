@@ -424,7 +424,9 @@ function brandWatermark(make){
   const key=raw.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/&/g,"and").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
   const simpleSlugs={"porsche":"porsche","ferrari":"ferrari","bmw":"bmw","mercedes-benz":"mercedesbenz","mercedes-amg":"mercedesbenz","audi":"audi","volkswagen":"volkswagen","vw":"volkswagen","toyota":"toyota","honda":"honda","nissan":"nissan","lamborghini":"lamborghini","mclaren":"mclaren","bugatti":"bugatti","tesla":"tesla","ford":"ford","chevrolet":"chevrolet","hyundai":"hyundai","kia":"kia","mazda":"mazda","subaru":"subaru","mitsubishi":"mitsubishi","lexus":"lexus","volvo":"volvo","jaguar":"jaguar","land-rover":"landrover","range-rover":"landrover","bentley":"bentley","rolls-royce":"rollsroyce","aston-martin":"astonmartin","peugeot":"peugeot","renault":"renault","citroen":"citroen","alpine":"alpine","fiat":"fiat","skoda":"skoda","seat":"seat","cupra":"cupra","opel":"opel","dacia":"dacia","mini":"mini","maserati":"maserati","pagani":"pagani","koenigsegg":"koenigsegg","alfa-romeo":"alfaromeo","ds-automobiles":"dsautomobiles","polestar":"polestar","lucid":"lucidmotors","rivian":"rivian","genesis":"genesis","acura":"acura","infiniti":"infiniti","cadillac":"cadillac","dodge":"dodge","jeep":"jeep","ram":"ram","buick":"buick","gmc":"gmc","lincoln":"lincoln","chrysler":"chrysler","lotus":"lotus","smart":"smart"};
   const fallbackSlug=key;
-  const fallbackUrl=(!simpleSlugs[key] && fallbackSlug) ? `https://cdn.jsdelivr.net/npm/car-brand-logos@1.0.0/${fallbackSlug}-logo.svg` : "";
+  const fallbackAliases={"alfa-romeo":"alfa-romeo","mercedes-amg":"mercedes-benz","ds-automobiles":"ds","autre-non-list%C3%A9e":""};
+  const resolvedFallback=fallbackAliases[key]??fallbackSlug;
+  const fallbackUrl=resolvedFallback ? `https://cdn.jsdelivr.net/npm/car-brand-logos@1.0.0/${resolvedFallback}-logo.svg` : "";
   const simpleUrl=simpleSlugs[key] ? `https://cdn.simpleicons.org/${simpleSlugs[key]}/ffffff` : "";
   return src ? `<img class="brand-watermark" src="${src}" data-fallback="${fallbackUrl}" data-primary="${simpleUrl}" alt="" aria-hidden="true" loading="lazy" onerror="if(this.dataset.primary&&this.src===this.dataset.primary&&this.dataset.fallback){this.src=this.dataset.fallback;this.dataset.primary='';}else{this.remove();}">` : "";
 }
@@ -718,13 +720,14 @@ $("logoutBtn").addEventListener("click",async()=>{try{await api("/api/auth/logou
 </style>
 
 <style id="autodex-brand-watermarks">
-/* Logos automobiles agrandis, remontés et maintenus à l'écart des boutons. */
+/* Logos automobiles plus grands et visibles, en restant au-dessus du texte et loin des boutons. */
 .card .card-body,.profile-car .pc-body{position:relative;isolation:isolate;overflow:hidden}
-.card .brand-watermark,.profile-car .brand-watermark{position:absolute;z-index:0;right:12px;top:3px;width:clamp(52px,25%,84px);height:52px;object-fit:contain;object-position:center;transform:none;opacity:.15;filter:grayscale(1) brightness(0) invert(1);pointer-events:none;user-select:none}
-.card .model,.profile-car .pc-body>strong{padding-right:76px;position:relative;z-index:1}
+.card .brand-watermark{position:absolute;z-index:0;right:10px;top:-5px;width:clamp(82px,34%,116px);height:72px;object-fit:contain;object-position:center;transform:none;opacity:.22;filter:grayscale(1) brightness(0) invert(1);pointer-events:none;user-select:none}
+.card .model{padding-right:102px;position:relative;z-index:1}
+.profile-car .pc-body>strong{padding-right:80px;position:relative;z-index:1}
 .card .card-body> :not(.brand-watermark),.profile-car .pc-body> :not(.brand-watermark){position:relative;z-index:1}
 .card .card-actions{position:relative;z-index:2;margin-top:13px}
-.profile-car .brand-watermark{width:54px;height:38px;right:9px;top:3px;opacity:.13}
+.profile-car .brand-watermark{width:72px;height:48px;right:7px;top:-2px;opacity:.19}
 .profile-car .pc-body{min-height:65px}
 </style>
 
