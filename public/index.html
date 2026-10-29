@@ -442,7 +442,16 @@ const BRAND_ICON_ALIASES={
   "mercedes":"mercedes-benz","mercedes-amg":"mercedes-benz","mb":"mercedes-benz","vw":"volkswagen","volkswagen-utilitaires":"volkswagen",
   "landrover":"land-rover","range-rover":"land-rover","rolls-royce-motor-cars":"rolls-royce","lucid-motors":"lucid",
   "ram-trucks":"ram","ds":"ds-automobiles","ds-automobiles":"ds-automobiles","citroen-automobiles":"citroen",
-  "mini-cooper":"mini","alfa romeo":"alfa-romeo","autre-non-listee":""
+  "mini-cooper":"mini","alfa romeo":"alfa-romeo","autre-non-listee":"", "ats-automobili":"ats"
+};
+// Sources dédiées pour quelques marques dont les fichiers génériques peuvent afficher un fond carré.
+const BRAND_SPECIAL_LOGOS={
+  // PNG transparents de secours pour éviter le carré gris sur l’emblème Abarth.
+  "abarth":["https://cdn.jsdelivr.net/gh/filippofilip95/car-logos-dataset@master/logos/optimized/abarth.png","https://cdn.jsdelivr.net/gh/vehiclespecs/brand-logos@v1.0.0/abarth-logo.svg"],
+  // Marques historiques / sportives absentes de certaines bibliothèques génériques.
+  "matra":["https://commons.wikimedia.org/wiki/Special:Redirect/file/Matra_sports_logo.svg","https://cdn.jsdelivr.net/gh/vehiclespecs/brand-logos@v1.0.0/matra-logo.svg"],
+  "ats":["https://commons.wikimedia.org/wiki/Special:Redirect/file/Ats-logo.svg","https://cdn.jsdelivr.net/gh/vehiclespecs/brand-logos@v1.0.0/ats-logo.svg"],
+  "ats-automobili":["https://commons.wikimedia.org/wiki/Special:Redirect/file/Ats-logo.svg","https://cdn.jsdelivr.net/gh/vehiclespecs/brand-logos@v1.0.0/ats-logo.svg"]
 };
 function brandLogoSources(make){
   const key=normalizedBrandKey(make);
@@ -451,6 +460,9 @@ function brandLogoSources(make){
   const iconSlug=BRAND_ICON_ONLY_SLUGS[canonical];
   const repo=BRAND_REPO_SLUGS[canonical] || BRAND_REPO_SLUGS[key] || (canonical && canonical!=="autre-non-list%C3%A9e" ? canonical : "");
   const urls=[];
+  // Pour les marques à problème, essayer d’abord une source dédiée, puis conserver les sources habituelles en secours.
+  if(BRAND_SPECIAL_LOGOS[key]) urls.push(...BRAND_SPECIAL_LOGOS[key]);
+  if(BRAND_SPECIAL_LOGOS[canonical] && canonical!==key) urls.push(...BRAND_SPECIAL_LOGOS[canonical]);
   // Keep the original clean, symbol-style logos for brands already supported.
   if(simple) urls.push(`https://cdn.simpleicons.org/${simple}/ffffff`);
   // Extra manufacturers use emblem SVGs only; never generate a logo from text.
