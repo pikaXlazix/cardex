@@ -12,3 +12,5 @@ Déploiement Render :
 4. Fais un commit et attends le redéploiement.
 
 Le serveur utilise PostgreSQL via DATABASE_URL. Le fichier package-lock.json sera généré par npm install si nécessaire.
+
+Modification visuelle : le skin Or utilise maintenant le symbole ✪, distinct du symbole ♛ du skin Godly. Le style général des cartes et des skins reste identique.
