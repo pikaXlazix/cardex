@@ -428,22 +428,43 @@ const BRAND_REPO_SLUGS={
   "pagani":"pagani","rimac":"rimac","lucid":"lucid","lucid-motors":"lucid","nio":"nio","xpeng":"xpeng","vinfast":"vinfast"
 };
 function normalizedBrandKey(make){return String(make||"").trim().normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/&/g,"and").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");}
-function brandLogoUrl(make){
+const BRAND_ICON_ONLY_SLUGS={
+  "acura":"acura","alfa-romeo":"alfa-romeo","aston-martin":"aston-martin","audi":"audi","bentley":"bentley","bmw":"bmw",
+  "buick":"buick","byd":"byd","cadillac":"cadillac","chevrolet":"chevrolet","chrysler":"chrysler","dodge":"dodge",
+  "ferrari":"ferrari","fiat":"fiat","ford":"ford","genesis":"genesis","gmc":"gmc","honda":"honda","hyundai":"hyundai",
+  "infiniti":"infiniti","jaguar":"jaguar","jeep":"jeep","kia":"kia","lamborghini":"lamborghini","land-rover":"land-rover",
+  "lexus":"lexus","lincoln":"lincoln","lotus":"lotus","lucid":"lucid","maserati":"maserati","mazda":"mazda",
+  "mercedes-benz":"mercedes-benz","mini":"mini","mitsubishi":"mitsubishi","nissan":"nissan","polestar":"polestar","porsche":"porsche",
+  "ram":"ram","rivian":"rivian","rolls-royce":"rolls-royce","subaru":"subaru","tesla":"tesla","toyota":"toyota",
+  "vinfast":"vinfast","volkswagen":"volkswagen","volvo":"volvo"
+};
+const BRAND_ICON_ALIASES={
+  "mercedes":"mercedes-benz","mercedes-amg":"mercedes-benz","mb":"mercedes-benz","vw":"volkswagen","volkswagen-utilitaires":"volkswagen",
+  "landrover":"land-rover","range-rover":"land-rover","rolls-royce-motor-cars":"rolls-royce","lucid-motors":"lucid",
+  "ram-trucks":"ram","ds":"ds-automobiles","ds-automobiles":"ds-automobiles","citroen-automobiles":"citroen",
+  "mini-cooper":"mini","alfa romeo":"alfa-romeo","autre-non-listee":""
+};
+function brandLogoSources(make){
   const key=normalizedBrandKey(make);
-  const simple=BRAND_SIMPLE_SLUGS[key];
-  if(simple) return `https://cdn.simpleicons.org/${simple}/ffffff`;
-  const repo=BRAND_REPO_SLUGS[key] || (key && key!=="autre-non-list%C3%A9e" ? key : "");
-  return repo ? `https://cdn.jsdelivr.net/gh/vehiclespecs/brand-logos@v1.0.0/${repo}-logo.svg` : "";
+  const canonical=BRAND_ICON_ALIASES[key]||key;
+  const simple=BRAND_SIMPLE_SLUGS[key] || BRAND_SIMPLE_SLUGS[canonical];
+  const iconSlug=BRAND_ICON_ONLY_SLUGS[canonical];
+  const repo=BRAND_REPO_SLUGS[canonical] || BRAND_REPO_SLUGS[key] || (canonical && canonical!=="autre-non-list%C3%A9e" ? canonical : "");
+  const urls=[];
+  // Keep the original clean, symbol-style logos for brands already supported.
+  if(simple) urls.push(`https://cdn.simpleicons.org/${simple}/ffffff`);
+  // Extra manufacturers use emblem SVGs only; never generate a logo from text.
+  if(iconSlug) urls.push(`https://cdn.jsdelivr.net/gh/diegojasso/car-logos-SVG@main/logos/${iconSlug}.svg`);
+  if(repo) urls.push(`https://cdn.jsdelivr.net/gh/vehiclespecs/brand-logos@v1.0.0/${repo}-logo.svg`);
+  return [...new Set(urls)];
 }
+function brandLogoUrl(make){return brandLogoSources(make)[0]||"";}
 function brandWatermark(make){
-  const key=normalizedBrandKey(make);
-  const src=brandLogoUrl(make);
-  if(!src) return "";
-  const simple=BRAND_SIMPLE_SLUGS[key];
-  const repo=BRAND_REPO_SLUGS[key] || (key && key!=="autre-non-list%C3%A9e" ? key : "");
-  const fallback=repo ? `https://cdn.jsdelivr.net/gh/vehiclespecs/brand-logos@v1.0.0/${repo}-logo.svg` : "";
-  const primary=simple ? src : "";
-  return `<img class="brand-watermark" src="${src}" data-fallback="${fallback}" data-primary="${primary}" alt="" aria-hidden="true" loading="lazy" onerror="if(this.dataset.fallback&&this.src!==this.dataset.fallback){this.src=this.dataset.fallback;this.dataset.primary='';}else{this.remove();}">`;
+  const urls=brandLogoSources(make);
+  if(!urls.length) return "";
+  const first=urls.shift();
+  const next=urls.join("|");
+  return `<img class="brand-watermark" src="${first}" data-next="${next}" alt="" aria-hidden="true" loading="lazy" onerror="if(this.dataset.next){const a=this.dataset.next.split('|');this.src=a.shift();this.dataset.next=a.join('|');}else{this.remove();}">`;
 }
 function render() {
   // Si le skin enregistré est verrouillé (ex. ancien compte avec Bronze et 0 €), revenir au skin gratuit.
@@ -737,7 +758,7 @@ $("logoutBtn").addEventListener("click",async()=>{try{await api("/api/auth/logou
 <style id="autodex-brand-watermarks">
 /* Logos de constructeurs : détails préservés, modèles descendus et commandes dégagées. */
 .card .card-body,.profile-car .pc-body{position:relative;isolation:isolate;overflow:hidden}
-.card .brand-watermark{position:absolute;z-index:0;right:10px;top:8px;width:clamp(88px,36%,124px);height:74px;object-fit:contain;object-position:center;transform:none;opacity:.24;filter:grayscale(1) brightness(0) invert(1);pointer-events:none;user-select:none}
+.card .brand-watermark{position:absolute;z-index:0;right:10px;top:8px;width:clamp(88px,36%,124px);height:74px;object-fit:contain;object-position:center;transform:none;opacity:.24;filter:grayscale(1) brightness(0) invert(1);pointer-events:none;user-select:none;background:transparent!important;mix-blend-mode:screen}
 .card .model{padding-right:108px;padding-top:10px;position:relative;z-index:1;min-height:34px}
 .profile-car .pc-body>strong{padding-right:86px;padding-top:8px;position:relative;z-index:1;display:block}
 .card .card-body> :not(.brand-watermark),.profile-car .pc-body> :not(.brand-watermark){position:relative;z-index:1}
