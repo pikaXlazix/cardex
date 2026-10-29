@@ -396,41 +396,54 @@ function carMotif(c){
   if(/ferrari|lamborghini|mclaren|bugatti|koenigsegg|pagani|lotus|zenvo|gordon murray|hennessey|ssc|w motors|apollo/.test(make)) return "speed";
   return "road";
 }
-// Logos constructeur : privilégie les SVG transparents Simple Icons pour les marques connues.
+// Logos constructeurs : Simple Icons en priorité, puis bibliothèque automobile pour couvrir davantage de marques.
+const BRAND_SIMPLE_SLUGS={
+  "porsche":"porsche","ferrari":"ferrari","bmw":"bmw","mercedes-benz":"mercedesbenz","mercedes-amg":"mercedesbenz",
+  "audi":"audi","volkswagen":"volkswagen","vw":"volkswagen","toyota":"toyota","honda":"honda","nissan":"nissan",
+  "lamborghini":"lamborghini","mclaren":"mclaren","bugatti":"bugatti","tesla":"tesla","ford":"ford","chevrolet":"chevrolet",
+  "hyundai":"hyundai","kia":"kia","mazda":"mazda","subaru":"subaru","mitsubishi":"mitsubishi","lexus":"lexus",
+  "volvo":"volvo","jaguar":"jaguar","land-rover":"landrover","range-rover":"landrover","bentley":"bentley",
+  "rolls-royce":"rollsroyce","aston-martin":"astonmartin","peugeot":"peugeot","renault":"renault","citroen":"citroen",
+  "alpine":"alpine","fiat":"fiat","skoda":"skoda","seat":"seat","cupra":"cupra","opel":"opel","dacia":"dacia",
+  "mini":"mini","maserati":"maserati","pagani":"pagani","koenigsegg":"koenigsegg","ds-automobiles":"dsautomobiles",
+  "polestar":"polestar","lucid":"lucidmotors","rivian":"rivian","genesis":"genesis","acura":"acura","infiniti":"infiniti",
+  "cadillac":"cadillac","dodge":"dodge","jeep":"jeep","ram":"ram","buick":"buick","gmc":"gmc","lincoln":"lincoln",
+  "chrysler":"chrysler","lotus":"lotus","smart":"smart","byd":"byd","suzuki":"suzuki"
+};
+const BRAND_REPO_SLUGS={
+  "alfa-romeo":"alfa-romeo","mercedes-amg":"mercedes-benz","ds-automobiles":"ds","rolls-royce":"rolls-royce",
+  "aston-martin":"aston-martin","land-rover":"land-rover","range-rover":"land-rover","vw":"volkswagen",
+  "volkswagen-utilitaires":"volkswagen","autre-non-list%C3%A9e":"","autre-non-listee":"",
+  "abarth":"abarth","acura":"acura","alpine":"alpine","audi":"audi","bentley":"bentley","bmw":"bmw",
+  "bugatti":"bugatti","buick":"buick","byd":"byd","cadillac":"cadillac","chevrolet":"chevrolet","chrysler":"chrysler",
+  "citroen":"citroen","cupra":"cupra","dacia":"dacia","dodge":"dodge","ferrari":"ferrari","fiat":"fiat","ford":"ford",
+  "genesis":"genesis","gmc":"gmc","honda":"honda","hyundai":"hyundai","infiniti":"infiniti","jaguar":"jaguar","jeep":"jeep",
+  "kia":"kia","lamborghini":"lamborghini","lancia":"lancia","lexus":"lexus","lincoln":"lincoln","lotus":"lotus",
+  "maserati":"maserati","mazda":"mazda","mclaren":"mclaren","mercedes-benz":"mercedes-benz","mini":"mini","mitsubishi":"mitsubishi",
+  "nissan":"nissan","opel":"opel","peugeot":"peugeot","polestar":"polestar","porsche":"porsche","ram":"ram","renault":"renault",
+  "rivian":"rivian","rolls-royce":"rolls-royce","saab":"saab","seat":"seat","skoda":"skoda","smart":"smart","subaru":"subaru",
+  "suzuki":"suzuki","tesla":"tesla","toyota":"toyota","volvo":"volvo","xpeng":"xpeng","alfa-romeo":"alfa-romeo",
+  "aston-martin":"aston-martin","land-rover":"land-rover","range-rover":"land-rover","volkswagen":"volkswagen",
+  "cadillac":"cadillac","acura":"acura","mitsubishi":"mitsubishi","morgan":"morgan","caterham":"caterham","koenigsegg":"koenigsegg",
+  "pagani":"pagani","rimac":"rimac","lucid":"lucid","lucid-motors":"lucid","nio":"nio","xpeng":"xpeng","vinfast":"vinfast"
+};
+function normalizedBrandKey(make){return String(make||"").trim().normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/&/g,"and").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");}
 function brandLogoUrl(make){
-  const raw=String(make||"").trim();
-  const key=raw.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/&/g,"and").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
-  // Alfa Romeo : véritable emblème transparent en SVG, avec les détails du blason.
-  if(key === "alfa-romeo") return "https://brandlogos.sgp1.digitaloceanspaces.com/svg/cbi/alfa-romeo.svg";
-  const simpleIcons={
-    "porsche":"porsche","ferrari":"ferrari","bmw":"bmw","mercedes-benz":"mercedesbenz","mercedes-amg":"mercedesbenz",
-    "audi":"audi","volkswagen":"volkswagen","vw":"volkswagen","toyota":"toyota","honda":"honda","nissan":"nissan",
-    "lamborghini":"lamborghini","mclaren":"mclaren","bugatti":"bugatti","tesla":"tesla","ford":"ford","chevrolet":"chevrolet",
-    "hyundai":"hyundai","kia":"kia","mazda":"mazda","subaru":"subaru","mitsubishi":"mitsubishi","lexus":"lexus",
-    "volvo":"volvo","jaguar":"jaguar","land-rover":"landrover","range-rover":"landrover","bentley":"bentley",
-    "rolls-royce":"rollsroyce","aston-martin":"astonmartin","peugeot":"peugeot","renault":"renault","citroen":"citroen",
-    "alpine":"alpine","fiat":"fiat","skoda":"skoda","seat":"seat","cupra":"cupra","opel":"opel","dacia":"dacia",
-    "mini":"mini","maserati":"maserati","pagani":"pagani","koenigsegg":"koenigsegg","alfa-romeo":"",
-    "ds-automobiles":"dsautomobiles","polestar":"polestar","lucid":"lucidmotors","rivian":"rivian","genesis":"genesis",
-    "acura":"acura","infiniti":"infiniti","cadillac":"cadillac","dodge":"dodge","jeep":"jeep","ram":"ram",
-    "buick":"buick","gmc":"gmc","lincoln":"lincoln","chrysler":"chrysler","lotus":"lotus","smart":"smart"
-  };
-  const slug=Object.prototype.hasOwnProperty.call(simpleIcons,key)?simpleIcons[key]:"";
-  const aliases={"ds-automobiles":"ds","mercedes-amg":"mercedes-benz","rolls-royce":"rolls-royce","aston-martin":"aston-martin","land-rover":"land-rover","range-rover":"land-rover","vw":"volkswagen","volkswagen-utilitaires":"volkswagen","autre-non-listee":""};
-  const fallback=Object.prototype.hasOwnProperty.call(aliases,key)?aliases[key]:key;
-  return slug ? `https://cdn.simpleicons.org/${slug}/ffffff` : (fallback ? `https://cdn.jsdelivr.net/npm/car-brand-logos@1.0.0/${fallback}-logo.svg` : "");
+  const key=normalizedBrandKey(make);
+  const simple=BRAND_SIMPLE_SLUGS[key];
+  if(simple) return `https://cdn.simpleicons.org/${simple}/ffffff`;
+  const repo=BRAND_REPO_SLUGS[key] || (key && key!=="autre-non-list%C3%A9e" ? key : "");
+  return repo ? `https://cdn.jsdelivr.net/gh/vehiclespecs/brand-logos@v1.0.0/${repo}-logo.svg` : "";
 }
 function brandWatermark(make){
+  const key=normalizedBrandKey(make);
   const src=brandLogoUrl(make);
-  const raw=String(make||"").trim();
-  const key=raw.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/&/g,"and").replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");
-  const simpleSlugs={"porsche":"porsche","ferrari":"ferrari","bmw":"bmw","mercedes-benz":"mercedesbenz","mercedes-amg":"mercedesbenz","audi":"audi","volkswagen":"volkswagen","vw":"volkswagen","toyota":"toyota","honda":"honda","nissan":"nissan","lamborghini":"lamborghini","mclaren":"mclaren","bugatti":"bugatti","tesla":"tesla","ford":"ford","chevrolet":"chevrolet","hyundai":"hyundai","kia":"kia","mazda":"mazda","subaru":"subaru","mitsubishi":"mitsubishi","lexus":"lexus","volvo":"volvo","jaguar":"jaguar","land-rover":"landrover","range-rover":"landrover","bentley":"bentley","rolls-royce":"rollsroyce","aston-martin":"astonmartin","peugeot":"peugeot","renault":"renault","citroen":"citroen","alpine":"alpine","fiat":"fiat","skoda":"skoda","seat":"seat","cupra":"cupra","opel":"opel","dacia":"dacia","mini":"mini","maserati":"maserati","pagani":"pagani","koenigsegg":"koenigsegg","alfa-romeo":"","ds-automobiles":"dsautomobiles","polestar":"polestar","lucid":"lucidmotors","rivian":"rivian","genesis":"genesis","acura":"acura","infiniti":"infiniti","cadillac":"cadillac","dodge":"dodge","jeep":"jeep","ram":"ram","buick":"buick","gmc":"gmc","lincoln":"lincoln","chrysler":"chrysler","lotus":"lotus","smart":"smart"};
-  const fallbackSlug=key;
-  const fallbackAliases={"alfa-romeo":"alfa-romeo","mercedes-amg":"mercedes-benz","ds-automobiles":"ds","autre-non-list%C3%A9e":""};
-  const resolvedFallback=fallbackAliases[key]??fallbackSlug;
-  const fallbackUrl=key === "alfa-romeo" ? "https://brandlogos.sgp1.digitaloceanspaces.com/svg/cbi/alfa-romeo.svg" : (resolvedFallback ? `https://cdn.jsdelivr.net/npm/car-brand-logos@1.0.0/${resolvedFallback}-logo.svg` : "");
-  const simpleUrl=simpleSlugs[key] ? `https://cdn.simpleicons.org/${simpleSlugs[key]}/ffffff` : "";
-  return src ? `<img class="brand-watermark" src="${src}" data-fallback="${fallbackUrl}" data-primary="${simpleUrl}" alt="" aria-hidden="true" loading="lazy" onerror="if(this.dataset.primary&&this.src===this.dataset.primary&&this.dataset.fallback){this.src=this.dataset.fallback;this.dataset.primary='';}else{this.remove();}">` : "";
+  if(!src) return "";
+  const simple=BRAND_SIMPLE_SLUGS[key];
+  const repo=BRAND_REPO_SLUGS[key] || (key && key!=="autre-non-list%C3%A9e" ? key : "");
+  const fallback=repo ? `https://cdn.jsdelivr.net/gh/vehiclespecs/brand-logos@v1.0.0/${repo}-logo.svg` : "";
+  const primary=simple ? src : "";
+  return `<img class="brand-watermark" src="${src}" data-fallback="${fallback}" data-primary="${primary}" alt="" aria-hidden="true" loading="lazy" onerror="if(this.dataset.fallback&&this.src!==this.dataset.fallback){this.src=this.dataset.fallback;this.dataset.primary='';}else{this.remove();}">`;
 }
 function render() {
   // Si le skin enregistré est verrouillé (ex. ancien compte avec Bronze et 0 €), revenir au skin gratuit.
@@ -724,12 +737,12 @@ $("logoutBtn").addEventListener("click",async()=>{try{await api("/api/auth/logou
 <style id="autodex-brand-watermarks">
 /* Logos de constructeurs : détails préservés, modèles descendus et commandes dégagées. */
 .card .card-body,.profile-car .pc-body{position:relative;isolation:isolate;overflow:hidden}
-.card .brand-watermark{position:absolute;z-index:0;right:10px;top:8px;width:clamp(88px,36%,124px);height:74px;object-fit:contain;object-position:center;transform:none;opacity:.24;filter:grayscale(1) contrast(1.2);pointer-events:none;user-select:none}
+.card .brand-watermark{position:absolute;z-index:0;right:10px;top:8px;width:clamp(88px,36%,124px);height:74px;object-fit:contain;object-position:center;transform:none;opacity:.24;filter:grayscale(1) brightness(0) invert(1);pointer-events:none;user-select:none}
 .card .model{padding-right:108px;padding-top:10px;position:relative;z-index:1;min-height:34px}
 .profile-car .pc-body>strong{padding-right:86px;padding-top:8px;position:relative;z-index:1;display:block}
 .card .card-body> :not(.brand-watermark),.profile-car .pc-body> :not(.brand-watermark){position:relative;z-index:1}
 .card .card-actions{position:relative;z-index:2;margin-top:13px}
-.profile-car .brand-watermark{width:78px;height:52px;right:7px;top:5px;opacity:.22;filter:grayscale(1) contrast(1.2)}
+.profile-car .brand-watermark{width:78px;height:52px;right:7px;top:5px;opacity:.22;filter:grayscale(1) brightness(0) invert(1)}
 .profile-car .pc-body{min-height:72px}
 </style>
 
